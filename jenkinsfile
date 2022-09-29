@@ -1,0 +1,54 @@
+pipeline{
+    agent{
+        label "NODE"
+    }
+    parameters {
+        choice(name: 'BRANCH_TO_BUILD', choices: ['main', 'dev'], description: 'this is parameters')
+        string(name: 'MAVEN_BUILD', defaultValue: 'clean package', description: 'maven build')
+    }
+    
+    triggers {
+        pollSCM('* * * * *')
+    }
+    options {
+     buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+    stages{
+        stage("checkout"){
+            steps {
+                mail to: "akashkadao@gmail.com",
+                    subject: "Build started for Jenkins JOB $JOB_NAME",
+                    body: "Build started for Jenkins JOB $JOB_NAME"
+                git branch: "${params.BRANCH_TO_BUILD}", url: "https://github.com/akashkadao/spring-petclinic.git"
+            }
+        }
+        stage("build"){
+            steps{
+                sh "mvn ${params.MAVEN_BUILD}"
+            }
+        }
+        stage("result"){
+            steps{
+                junit '**/target/surefire-reports/TEST-*.xml'
+                archiveArtifacts 'target/*.jar' 
+            }
+        }
+    }
+
+    post {
+        always{
+            echo "====++++job completed++++===="
+            mail to: "akashkadao@gmail.com",
+                subject: "JOB completed $JOB_NAME with Build Id $BUILD_ID ",
+                body: "JOB completed for Jenkins JOB $JOB_URL"
+        }
+        failure {
+            mail to: "akashkadao@gmail.com",
+                subject: "Build Failed for Jenkins JOB $JOB_NAME with Build Id $BUILD_ID ",
+                body: "Build Failed for Jenkins JOB $JOB_URL"
+        }
+        success {
+            junit '**/target/surefire-reports/TEST-*.xml'
+        }
+    }
+}

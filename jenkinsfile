@@ -3,8 +3,7 @@ pipeline{
         label "NODE"
     }
     parameters {
-        choice(name: 'BRANCH_TO_BUILD', choices: ['main', 'dev'], description: 'this is parameters')
-        string(name: 'MAVEN_BUILD', defaultValue: 'clean package', description: 'maven build')
+        string(name: 'MAVEN_BUILD', defaultValue: 'clean install', description: 'maven build')
     }
     
     triggers {

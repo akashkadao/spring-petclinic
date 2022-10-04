@@ -22,11 +22,38 @@ pipeline{
                 git branch: "${params.BRANCH_TO_BUILD}", url: "https://github.com/akashkadao/spring-petclinic.git"
             }
         }
-        stage("build"){
-            steps{
-                sh "mvn ${params.MAVEN_BUILD}"
+        stage ('Artifactory Configuration') {
+            steps {
+                
+                rtMavenDeployer (
+                    id: 'maven-deployer',
+                    serverId: 'central',
+                    releaseRepo: hello-libs-release-local,
+                    snapshotRepo: hello-libs-snapshot-local,
+                )
             }
         }
+        
+        stage('Build Maven Project') {
+            steps {
+                rtMavenRun (
+                    tool: 'maven',
+                    pom: 'pom.xml',
+                    goals: 'clean install',
+                    deployerId: "maven-deployer",
+                    
+                )
+            }
+        }
+
+        stage ('Publish Build Info') {
+            steps {
+                rtPublishBuildInfo (
+                    serverId: "central"
+                )
+            }
+        }
+        
         stage("result"){
             steps{
                 junit '**/target/surefire-reports/TEST-*.xml'
@@ -41,6 +68,9 @@ pipeline{
             mail to: "akashkadao@gmail.com",
                 subject: "JOB completed $JOB_NAME with Build Id $BUILD_ID ",
                 body: "JOB completed for Jenkins JOB $JOB_URL"
+
+                archiveArtifacts artifacts: '**/*.jar', fingerprint: true
+                junit '**/*.xml'
         }
         failure {
             mail to: "akashkadao@gmail.com",

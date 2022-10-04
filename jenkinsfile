@@ -27,8 +27,8 @@ pipeline{
                 rtMavenDeployer (
                     id: 'maven-deployer',
                     serverId: 'central',
-                    releaseRepo: hello-libs-release-local,
-                    snapshotRepo: hello-libs-snapshot-local,
+                    releaseRepo: 'hello-libs-release-local',
+                    snapshotRepo: 'hello-libs-snapshot-local',
                 )
             }
         }

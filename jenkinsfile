@@ -18,7 +18,7 @@ pipeline{
                 mail to: "akashkadao@gmail.com",
                     subject: "Build started for Jenkins JOB $JOB_NAME",
                     body: "Build started for Jenkins JOB $JOB_NAME"
-                git branch: "${params.BRANCH_TO_BUILD}", url: "https://github.com/akashkadao/spring-petclinic.git"
+                git branch: "main", url: "https://github.com/akashkadao/spring-petclinic.git"
             }
         }
         stage ('Artifactory Configuration') {
